@@ -4,35 +4,65 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <meta charset="UTF-8">
     <title>CIFAR-10 Image Predictor</title>
+    <style>
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-info {
+            color: #004085;
+            background-color: #cce5ff;
+            border-color: #b8daff;
+        }
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+        }
+    </style>
     <script>
         async function trainModel() {
             const res = await fetch('/train', { method: 'POST' });
             const data = await res.json();
             alert(data.message);
+            location.reload(); // Reload page to update model status
         }
 
         async function predict(index) {
-    const res = await fetch('/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ index: parseInt(index) })
-    });
-    const data = await res.json();
-    document.getElementById('result').innerText = "Prediction: " + data.prediction;
-}
+            const res = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: parseInt(index) })
+            });
+            const data = await res.json();
+            document.getElementById('result').innerText = "Prediction: " + data.prediction;
+        }
     </script>
 </head>
 <body>
     <h1>CIFAR-10 Classifier</h1>
+    
+    {% if model_exists %}
+        <div class="alert alert-info">
+            A trained model is loaded and ready for predictions.
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            No trained model found. Please click "Train Model" to begin.
+        </div>
+    {% endif %}
+
     <button onclick="trainModel()">Train Model</button>
     <h3>Click an image to predict:</h3>
-    <div style="display: flex; flex-wrap: wrap;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: center;">
         {% for image in image_files %}
         <div style="margin: 10px;">
             <div class="image-container" style="margin: 10px;"></div>
             <img src="{{ url_for('static', filename='images/' + image) }}" 
                  style="width: 64px; height: 64px; cursor:pointer;"
-                 onclick="predict('{{ loop.index0 }}')">
+                 onclick="predict('{{ image_indices[loop.index0] }}')">
         </div>
         {% endfor %}
     </div>
