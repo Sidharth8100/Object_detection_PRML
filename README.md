@@ -74,3 +74,6 @@ To run the code:
 
    ```bash
    pip install -r requirements.txt
+3. Run the provided notebooks/scripts to train and evaluate models.
+
+---
